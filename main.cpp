@@ -1,4 +1,5 @@
 
+
 #include <iostream>
 #include <vector>
 #include <map>
@@ -18,10 +19,11 @@ int parts;
 penguin globscores;
 bool natIsDead(std::string natname,int turnnum);
 std::string getRedditTableFormatString(penguin rankings);
+penguin getSidewaysRankings(penguin scorelist,int maxnum,int atturn);
 
 int main(int argc, const char * argv[]) {
 	// insert code here...
-	std::ifstream file = std::ifstream("pathname_here.csv");
+	std::ifstream file = std::ifstream("/absolute/path/to/file/exported/from/spreadsheets/of/rankings.csv");
 	std::string val;
 	std::vector<std::vector<std::string>> loadeds = {};
 	//grab csv stuffs
@@ -50,8 +52,26 @@ int main(int argc, const char * argv[]) {
 	//vvv Uncomment if you want all the values everywhere vvvv
 	//std::cout << scorelistAsString(getNthRankings(scores,3)) << "\n";
 	//Otherwise, this prints out the rankings for the current turn
-	std::cout << getRedditTableFormatString(getNthRankings(scores, 3)) << "\n";
+	//std::cout << getRedditTableFormatString(getNthRankings(scores, 2)) << "\n";
+	//And this gives the sideways-rankings
+	//std::cout << scorelistAsString(getSidewaysRankings(scores, 15, 101));
+	//And this gives rankings of sideways-rankings at the 'current turn'
+	std::cout << getRedditTableFormatString(getNthRankings(getSidewaysRankings(scores, 15, 101),2));
 	
+}
+
+penguin getSidewaysRankings(penguin scorelist,int maxnum,int atturn) {
+	penguin toReturn = {};
+	for (auto nation : scorelist) {
+		toReturn[nation.first] = {};
+	}
+	for (int i = 0;i<maxnum;i++) {
+		scorelist = generateScoreListFromScores(scorelist);
+		for (auto nation : scorelist) {
+			toReturn[nation.first].push_back(nation.second[atturn-1]);
+		}
+	}
+	return toReturn;
 }
 
 std::string getRedditTableFormatString(penguin rankings) {
@@ -117,7 +137,7 @@ penguin generateSumScoreListFromScores(penguin scorelist) {
 penguin generateScoreListFromScores(penguin scorelist) {
 	penguin sumscores = generateSumScoreListFromScores(scorelist);
 	penguin toReturn = sumscores;//clone this for now - we'll change its values in the loop
-	for (int turn = 0;turn<parts;turn++) {
+	for (int turn = 0;turn<scorelist["Boers"].size();turn++) {
 		std::vector<std::pair<std::string,int>> verticalSlice = {};
 		for (auto nation : sumscores) {
 			//loop through every nation, add it to vertical slice
