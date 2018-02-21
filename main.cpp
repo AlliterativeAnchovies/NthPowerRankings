@@ -1,5 +1,4 @@
 
-
 #include <iostream>
 #include <vector>
 #include <map>
@@ -20,10 +19,11 @@ penguin globscores;
 bool natIsDead(std::string natname,int turnnum);
 std::string getRedditTableFormatString(penguin rankings);
 penguin getSidewaysRankings(penguin scorelist,int maxnum,int atturn);
+std::string getRedditTableFormatFromFullRankings(penguin rankings);
 
 int main(int argc, const char * argv[]) {
 	// insert code here...
-	std::ifstream file = std::ifstream("/absolute/path/to/file/exported/from/spreadsheets/of/rankings.csv");
+	std::ifstream file = std::ifstream("/absolute/path/to/spreadsheet/exported/file/of/rankings.csv");
 	std::string val;
 	std::vector<std::vector<std::string>> loadeds = {};
 	//grab csv stuffs
@@ -56,7 +56,9 @@ int main(int argc, const char * argv[]) {
 	//And this gives the sideways-rankings
 	//std::cout << scorelistAsString(getSidewaysRankings(scores, 15, 101));
 	//And this gives rankings of sideways-rankings at the 'current turn'
-	std::cout << getRedditTableFormatString(getNthRankings(getSidewaysRankings(scores, 15, 101),2));
+	//std::cout << getRedditTableFormatString(getNthRankings(getSidewaysRankings(scores, 15, 101),2));
+	//Finally, this gives the whole tree of sideways rankings
+	std::cout << getRedditTableFormatFromFullRankings(getSidewaysRankings(scores, 15, 101));
 	
 }
 
@@ -70,6 +72,27 @@ penguin getSidewaysRankings(penguin scorelist,int maxnum,int atturn) {
 		for (auto nation : scorelist) {
 			toReturn[nation.first].push_back(nation.second[atturn-1]);
 		}
+	}
+	return toReturn;
+}
+
+std::string getRedditTableFormatFromFullRankings(penguin rankings) {
+	std::string toReturn = "Civ";
+	for (int i = 0;i<rankings["Boers"].size();i++) {
+		toReturn += "| 'Part' "+std::to_string(i);
+	}
+	toReturn+="\n:------";
+	for (int i = 0;i<rankings["Boers"].size();i++) {
+		toReturn += "|:------";
+	}
+	toReturn+="\n";
+	//go through every civ and populate table
+	for (auto nation : rankings) {
+		toReturn+=nation.first;
+		for (int i = 0;i<nation.second.size();i++) {
+			toReturn+=" | "+std::to_string(nation.second[i]);
+		}
+		toReturn+="\n";
 	}
 	return toReturn;
 }
